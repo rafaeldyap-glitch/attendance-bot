@@ -182,7 +182,34 @@ console.log(`${user.name} timed in at ${time}`);
 // =========================
 app.action("time_out", async ({ ack, body, client }) => {
   await ack();
-
+await client.chat.update({
+  channel: body.channel.id,
+  ts: body.message.ts,
+  text: "Attendance",
+  blocks: [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*☀️ Good Morning!*\n\nAttendance completed."
+      }
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: "✅ Attendance Completed"
+          },
+          style: "primary",
+          action_id: "attendance_completed"
+        }
+      ]
+    }
+  ]
+});
   const user = body.user;
 
   const time = new Date().toLocaleString("en-PH", {
