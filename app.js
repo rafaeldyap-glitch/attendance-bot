@@ -110,7 +110,7 @@ try {
   console.log("✅ Public announcement sent");
 } catch (err) {
   console.error("❌ postMessage failed:", err.data || err);
-});
+}
 
 // Save to Google Sheets
 try {
