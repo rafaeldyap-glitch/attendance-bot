@@ -40,7 +40,34 @@ async function saveTimeIn(name, time) {
     }
   });
 }
+async function saveTimeOut(name, time) {
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Sheet1!A:E",
+  });
 
+  const rows = response.data.values || [];
+
+  for (let i = rows.length - 1; i >= 1; i--) {
+    const row = rows[i];
+
+    if (row[1] === name && !row[3]) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: `Sheet1!D${i + 1}`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [[time]],
+        },
+      });
+
+      console.log(`✅ Time Out saved to row ${i + 1}`);
+      return;
+    }
+  }
+
+  console.log("❌ No matching Time In found.");
+}
 // Create Slack app
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -171,13 +198,21 @@ app.action("time_out", async ({ ack, body, client }) => {
     text: `🔴 *Time Out Recorded*\n\n👤 ${user.name}\n🕒 ${time}`,
   });
 
-  // Public announcement
-  await client.chat.postMessage({
-    channel: body.channel.id,
-    text: `🔴 <@${user.id}> timed out at *${time}*`,
-  });
+// Public announcement
+await client.chat.postMessage({
+  channel: body.channel.id,
+  text: `🔴 <@${user.id}> timed out at *${time}*`,
+});
 
-  console.log(`${user.name} timed out at ${time}`);
+// Save to Google Sheets
+try {
+  await saveTimeOut(user.name, time);
+  console.log("✅ Time Out saved to Google Sheets");
+} catch (err) {
+  console.error(err);
+}
+
+console.log(`${user.name} timed out at ${time}`);
 });
 // =========================
 // DAILY SCHEDULE
