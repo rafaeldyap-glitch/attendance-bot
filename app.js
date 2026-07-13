@@ -150,7 +150,35 @@ try {
 
 console.log(`${user.name} timed in at ${time}`);
 });
+// =========================
+// TIME OUT BUTTON
+// =========================
+app.action("time_out", async ({ ack, body, client }) => {
+  await ack();
 
+  const user = body.user;
+
+  const time = new Date().toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    dateStyle: "medium",
+    timeStyle: "medium",
+  });
+
+  // Private confirmation
+  await client.chat.postEphemeral({
+    channel: body.channel.id,
+    user: user.id,
+    text: `🔴 *Time Out Recorded*\n\n👤 ${user.name}\n🕒 ${time}`,
+  });
+
+  // Public announcement
+  await client.chat.postMessage({
+    channel: body.channel.id,
+    text: `🔴 <@${user.id}> timed out at *${time}*`,
+  });
+
+  console.log(`${user.name} timed out at ${time}`);
+});
 // =========================
 // DAILY SCHEDULE
 // Weekdays - 8:00 AM Manila
