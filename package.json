@@ -1,23 +1,23 @@
 {
   "name": "attendance-bot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Slack Attendance Bot",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "node app.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rafaeldyap-glitch/attendance-bot.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "slack",
+    "attendance"
+  ],
+  "author": "Rafael Yap",
   "license": "ISC",
   "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/rafaeldyap-glitch/attendance-bot/issues"
-  },
-  "homepage": "https://github.com/rafaeldyap-glitch/attendance-bot#readme",
   "dependencies": {
     "@slack/bolt": "^4.7.3",
     "dotenv": "^17.4.2",
