@@ -1,4 +1,7 @@
 require("dotenv").config();
+console.log("CLIENT EMAIL:", process.env.GOOGLE_CLIENT_EMAIL);
+console.log("SHEET ID:", process.env.GOOGLE_SHEET_ID);
+console.log("PRIVATE KEY EXISTS:", !!process.env.GOOGLE_PRIVATE_KEY);
 
 const { App } = require("@slack/bolt");
 const cron = require("node-cron");
@@ -7,7 +10,10 @@ const { google } = require("googleapis");
 const path = require("path");
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, "Credentials", "attendance-bot.json"),
+  credentials: {
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  },
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
@@ -95,7 +101,12 @@ await client.chat.postEphemeral({
 });
 
 // Save to Google Sheets
-await saveTimeIn(user.name, time);
+try {
+  await saveTimeIn(user.name, time);
+  console.log("✅ Saved to Google Sheets");
+} catch (err) {
+  console.error(err);
+}
 
 console.log(`${user.name} timed in at ${time}`);
 });
