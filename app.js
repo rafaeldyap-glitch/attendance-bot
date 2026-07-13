@@ -80,9 +80,37 @@ async function sendAttendanceMessage() {
 // =========================
 // TIME IN BUTTON
 // =========================
-app.action("time_in", async ({ ack, body, client }) => {
+app.action("time_in", async ({ ack, body, client, respond }) => {
   // KAILANGANG unang-una ito
   await ack();
+
+  await respond({
+    replace_original: true,
+    text: "Attendance",
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "*☀️ Good Morning!*\n\nPlease record your attendance."
+        }
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "🔴 Time Out"
+            },
+            style: "danger",
+            action_id: "time_out"
+          }
+        ]
+      }
+    ]
+  });
 
   const user = body.user;
   const now = new Date();
