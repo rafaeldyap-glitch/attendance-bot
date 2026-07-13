@@ -3,6 +3,38 @@ require("dotenv").config();
 const { App } = require("@slack/bolt");
 const cron = require("node-cron");
 
+const { google } = require("googleapis");
+const path = require("path");
+
+const auth = new google.auth.GoogleAuth({
+  keyFile: path.join(__dirname, "Credentials", "attendance-bot.json"),
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+});
+
+const sheets = google.sheets({
+  version: "v4",
+  auth,
+});
+
+async function saveTimeIn(name, time) {
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Sheet1!A:E",
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[
+        new Date().toLocaleDateString("en-PH", {
+          timeZone: "Asia/Manila"
+        }),
+        name,
+        time,
+        "",
+        ""
+      ]]
+    }
+  });
+}
+
 // Create Slack app
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -56,13 +88,16 @@ app.action("time_in", async ({ ack, body, client }) => {
   });
 
   // Reply only to the user who clicked
-  await client.chat.postEphemeral({
-    channel: body.channel.id,
-    user: user.id,
-    text: `✅ *Time In Recorded*\n\n👤 ${user.name}\n🕒 ${time}`,
-  });
+await client.chat.postEphemeral({
+  channel: body.channel.id,
+  user: user.id,
+  text: `✅ *Time In Recorded*\n\n👤 ${user.name}\n🕒 ${time}`,
+});
 
-  console.log(`${user.name} timed in at ${time}`);
+// Save to Google Sheets
+await saveTimeIn(user.name, time);
+
+console.log(`${user.name} timed in at ${time}`);
 });
 
 // =========================
