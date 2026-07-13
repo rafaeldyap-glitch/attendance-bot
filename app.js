@@ -100,6 +100,18 @@ await client.chat.postEphemeral({
   text: `✅ *Time In Recorded*\n\n👤 ${user.name}\n🕒 ${time}`,
 });
 
+// Public announcement sa channel
+try {
+  await client.chat.postMessage({
+    channel: body.channel.id,
+    text: `🟢 <@${user.id}> timed in at *${time}*`,
+  });
+
+  console.log("✅ Public announcement sent");
+} catch (err) {
+  console.error("❌ postMessage failed:", err.data || err);
+});
+
 // Save to Google Sheets
 try {
   await saveTimeIn(user.name, time);
@@ -130,6 +142,21 @@ cron.schedule(
     timezone: "Asia/Manila",
   }
 );
+
+// =========================
+// START SERVER
+// =========================
+(async () => {
+  try {
+    const result = await sheets.spreadsheets.get({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    });
+
+    console.log("✅ Connected to:", result.data.properties.title);
+  } catch (err) {
+    console.error(err);
+  }
+})();
 
 // =========================
 // START SERVER
