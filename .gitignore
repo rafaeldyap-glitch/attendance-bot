@@ -1,2 +1,4 @@
 node_modules
 .envCredentials/
+Credentials/
+.env
